@@ -30,7 +30,7 @@ module dut_test(
   );
 
   initial begin
-	$dumpfile("tests/interface.vcd");
+	$dumpfile("interface.vcd");
 	$dumpvars;
   end
 
