@@ -1,18 +1,18 @@
 module dut_test(
-      input  CLK,
-  input  RST_N,
+  input  wire        CLK,
+  input  wire        RST_N,
 
   // action method write
-  input  [2 : 0] write_address,
-  input  write_data,
-  input  write_en,
-  output write_rdy,
+  input  wire [2:0]  write_address,
+  input  wire        write_data,
+  input  wire        write_en,
+  output wire        write_rdy,
 
   // actionvalue method read
-  input  [2 : 0] read_address,
-  input  read_en,
-  output read_data,
-  output read_rdy;
+  input  wire [2:0]  read_address,
+  input  wire        read_en,
+  output wire        read_data,
+  output wire        read_rdy
 );
 
   // Instantiate the DUT
