@@ -1,17 +1,21 @@
-module dut_test;
+module dut_test(
 
   // Declare signals for DUT
-  reg CLK;
-  reg RST_N;
-  reg [2:0] write_address;
-  reg write_data;
-  reg write_en;
-  wire write_rdy;
+  input  CLK,
+  input  RST_N,
 
-  reg [2:0] read_address;
-  reg read_en;
-  wire read_data;
-  wire read_rdy;
+  // action method write
+  input  [2 : 0] write_address,
+  input  write_data,
+  input  write_en,
+  output write_rdy,
+
+  // actionvalue method read
+  input  [2 : 0] read_address,
+  input  read_en,
+  output read_data,
+  output read_rdy
+  );
 
   // Instantiate the DUT
   dut uut(
