@@ -1,4 +1,4 @@
-module dut_test(
+module dut_inst(
 
   // Declare signals for DUT
   input  CLK,
@@ -36,7 +36,7 @@ module dut_test(
 	$dumpvars(0, dut_test);
   CLK = 0;
         forever begin
-            #5 CLK = ~CLK;  // 10ns clock period
+            #5 CLK = ~CLK;  
         end
   end
 
