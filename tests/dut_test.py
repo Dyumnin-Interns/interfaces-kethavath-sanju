@@ -48,7 +48,7 @@ def read_address_cover(address):
 
 
 
-async def test_dut_fifo_behavior(dut):
+async def dut_test(dut):
     # Start clock
     cocotb.start_soon(Clock(dut.CLK, 10, units="ns").start())
 
@@ -92,3 +92,86 @@ async def test_dut_fifo_behavior(dut):
 
     # Assert that y_ff eventually outputs 1
     assert output in [0, 1], "Read data from y_ff must be 0 or 1"
+
+
+class InputDriver(BusDriver):
+    _signals = ["write_en", "write_address", "write_data", "write_rdy"]
+
+    def __init__(self, dut, name, clk):
+        super().__init__(dut, name, clk)
+        self.bus.write_en.value = 0
+        self.bus.write_address.value = 0
+        self.bus.write_data.value = 0
+        self.clk = clk
+
+    async def _driver_sent(self, address, data, sync=True):
+        for l in range(random.randint(1, 200)):
+            await RisingEdge(self.clk)
+        while not self.bus.write_rdy.value:
+            await RisingEdge(self.clk)
+        self.bus.write_en.value = 1
+        self.bus.write_address.value = address
+        self.bus.write_data.value = data
+        await ReadOnly()
+        await RisingEdge(self.clk)
+        await NextTimeStep()
+        self.bus.write_en.value = 0
+
+class InputMonitor(BusMonitor):
+    _signals = ["write_en", "write_address", "write_data", "write_rdy"]
+
+    async def _monitor_recv(self):
+        phases_w = {1: "Idle_w", 3: "Txn_w"}  # only two states as write_rdy is always 1
+        prev_w = "Idle_w"
+        while True:
+            await FallingEdge(self.clock)
+            await ReadOnly()
+            Txn_w = (int(self.bus.write_en.value) << 1) | int(self.bus.write_rdy.value)
+            state_w = phases_w.get(Txn_w)
+            if state_w:
+                inputport_cover({'previous_w': prev_w, 'current_w': state_w})
+                prev_w = state_w
+
+class OutputDriver(BusDriver):
+    _signals = ["read_en", "read_address", "read_data", "read_rdy"]
+
+    def __init__(self, dut, name, clk, sb_callback):
+        super().__init__(dut, name, clk)
+        self.bus.read_en.value = 0
+        self.bus.read_address.value = 0
+        self.clk = clk
+        self.callback = sb_callback
+
+    async def _driver_sent(self, address, sync=True):
+        for k in range(random.randint(1, 200)):
+            await RisingEdge(self.clk)
+        while not self.bus.read_rdy.value:
+            await RisingEdge(self.clk)
+        self.bus.read_en.value = 1
+        self.bus.read_address.value = address
+        await ReadOnly()
+
+        # Only check scoreboard for y_output (address 3)
+        if self.callback and address == 3:
+            self.callback(int(self.bus.read_data.value))
+        elif address in [0, 1, 2]:
+            cocotb.log.info(f"address={address}, value={int(self.bus.read_data.value)}")
+
+        await RisingEdge(self.clk)
+        await NextTimeStep()
+        self.bus.read_en.value = 0
+
+class OutputMonitor(BusMonitor):
+    _signals = ["read_en", "read_address", "read_data", "read_rdy"]
+
+    async def _monitor_recv(self):
+        phases_r = {1: "Idle_r", 3: "Txn_r"}  # only two states as read_rdy is always 1
+        prev_r = "Idle_r"
+        while True:
+            await FallingEdge(self.clock)
+            await ReadOnly()
+            Txn_r = (int(self.bus.read_en.value) << 1) | int(self.bus.read_rdy.value)
+            state_r = phases_r.get(Txn_r)
+            if state_r:
+                outputport_cover({'previous_r': prev_r, 'current_r': state_r})
+                prev_r = state_r
