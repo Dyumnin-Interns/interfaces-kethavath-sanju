@@ -34,10 +34,7 @@ def sb_fn(actual_value):
         cocotb.log.error("Mismatch detected!")
 
 
-# --------------
 # Coverage Points
-# --------------
-
 @CoverPoint("top.a", xf=lambda a, b: a, bins=[0, 1])
 @CoverPoint("top.b", xf=lambda a, b: b, bins=[0, 1])
 @CoverCross("top.cross.ab", items=["top.a", "top.b"])
@@ -64,10 +61,8 @@ def read_address_cover(addr):
     pass
 
 
-# -------------
-# Input Driver
-# -------------
 
+# Input Driver
 class InputDriver(BusDriver):
     _signals = ["write_en", "write_address", "write_data", "write_rdy"]
 
@@ -96,10 +91,8 @@ class InputDriver(BusDriver):
         self.bus.write_en.value = 0
 
 
-# ----------------
-# Input Monitor
-# ----------------
 
+# Input Monitor
 class InputMonitor(BusMonitor):
     _signals = ["write_en", "write_address", "write_data", "write_rdy"]
 
@@ -116,10 +109,8 @@ class InputMonitor(BusMonitor):
                 prev_state = state
 
 
-# ----------------
-# Output Driver
-# ----------------
 
+# Output Driver
 class OutputDriver(BusDriver):
     _signals = ["read_en", "read_address", "read_data", "read_rdy"]
 
@@ -151,10 +142,8 @@ class OutputDriver(BusDriver):
         self.bus.read_en.value = 0
 
 
-# -----------------
-# Output Monitor
-# -----------------
 
+# Output Monitor
 class OutputMonitor(BusMonitor):
     _signals = ["read_en", "read_address", "read_data", "read_rdy"]
 
@@ -171,10 +160,8 @@ class OutputMonitor(BusMonitor):
                 prev_state = state
 
 
-# -------------
-# Main Test
-# -------------
 
+# Main Test
 @cocotb.test()
 async def dut_test(dut):
     global expected_values, test_failures
@@ -242,4 +229,4 @@ async def dut_test(dut):
         raise TestFailure(f"{test_failures} mismatches found")
     elif expected_values:
         raise TestFailure(f"{len(expected_values)} expected values not checked")
-    cocotb.log.info("All test vectors passed successfully!")
+    cocotb.log.info("Coverage is done successfully!")
