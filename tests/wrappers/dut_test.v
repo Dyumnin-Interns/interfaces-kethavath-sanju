@@ -33,7 +33,11 @@ module dut_test(
 
   initial begin
 	$dumpfile("interface.vcd");
-	$dumpvars;
+	$dumpvars(0, dut_test);
+  CLK = 0;
+        forever begin
+            #5 CLK = ~CLK;  // 10ns clock period
+        end
   end
 
 
