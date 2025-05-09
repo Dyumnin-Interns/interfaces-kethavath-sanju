@@ -168,4 +168,3 @@ module dut(CLK,
   assign y_ff$DEQ = y_ff$EMPTY_N && pwyff_deq$whas ;
   assign y_ff$CLR = 1'b0 ;
 endmodule  // dut
-
