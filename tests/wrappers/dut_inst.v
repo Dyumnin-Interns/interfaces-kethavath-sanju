@@ -1,47 +1,50 @@
 module dut_inst(
+    output reg CLK,
+    input RST_N,
 
-  // Declare signals for DUT
-  output reg CLK,
-  input  RST_N,
+    // action method write
+    input [2:0] write_address,
+    input write_data,
+    input write_en,
+    output write_rdy,
 
-  // action method write
-  input  [2 : 0] write_address,
-  input  write_data,
-  input  write_en,
-  output write_rdy,
+    // actionvalue method read
+    input [2:0] read_address,
+    input read_en,
+    output read_data,
+    output read_rdy,
+    // to expose FIFO flags
+    output  a_full_n,
+    output  b_full_n,
+    output  y_empty_n
+);
+    
+    // Instantiate DUT
+    dut dut_inst (
+        .CLK(CLK),
+        .RST_N(RST_N),
+        .write_address(write_address),
+        .write_data(write_data),
+        .write_en(write_en),
+        .write_rdy(write_rdy),
+        .read_address(read_address),
+        .read_data(read_data),
+        .read_en(read_en),
+        .read_rdy(read_rdy)
+    );
 
-  // actionvalue method read
-  input  [2 : 0] read_address,
-  input  read_en,
-  output read_data,
-  output read_rdy
-  );
-
-  // Instantiate the DUT
-  dut uut(
-    .CLK(CLK),
-    .RST_N(RST_N),
-    .write_address(write_address),
-    .write_data(write_data),
-    .write_en(write_en),
-    .write_rdy(write_rdy),
-    .read_address(read_address),
-    .read_en(read_en),
-    .read_data(read_data),
-    .read_rdy(read_rdy)
-  );
-
-  initial begin
-	$dumpfile("interface.vcd");
-	$dumpvars(0, dut_inst);
-  CLK = 0;
+    assign a_full_n  = dut_inst.a_ff$FULL_N;
+    assign b_full_n  = dut_inst.b_ff$FULL_N;
+    assign y_empty_n = dut_inst.y_ff$EMPTY_N;
+    
+    // Clock generation with proper delay
+    initial begin
+        $dumpfile("interface_wave.vcd");
+        $dumpvars(0, dut_inst);
+        CLK = 0;
         forever begin
-            #5 CLK = ~CLK;  
+            #5 CLK = ~CLK; // 10ns clock period
         end
-  end
-
+    end
 
 endmodule
-
-
-
